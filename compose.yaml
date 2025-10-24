@@ -1,0 +1,46 @@
+# IP addresses:
+# Data Bases:
+#   172.32.2.[3-254]:5432
+# PGAdmin4:
+#   172.32.2.2:80 (localhost:80 from browser)
+
+services:
+  postgres-test:
+    container_name: postgres-test
+    image: postgres
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+    ports: 
+      - 5432:5432
+    volumes: 
+      - db-test:/var/lib/postgresql/data
+    networks:
+      restaurant:
+        ipv4_address: 172.32.2.3
+
+  pgadmin4:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=root@root.com
+      - PGADMIN_DEFAULT_PASSWORD=passwd
+    ports:
+      - 80:80
+    volumes:
+      - pgadmin4-volume:/var/lib/pgadmin
+    networks:
+      restaurant:
+        ipv4_address: 172.32.2.2
+
+volumes:
+  app:
+  db-test:
+  pgadmin4-volume:
+
+networks:
+  restaurant:
+    ipam:
+      driver: default
+      config:
+       - subnet: "172.32.2.0/24"
