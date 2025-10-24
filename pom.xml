@@ -7,13 +7,16 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.7</version>
 		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
+    </parent>
+
 	<groupId>com.thegethuber</groupId>
-	<artifactId>test</artifactId>
+	<artifactId>restaurant</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Test project</name>
-	<description>Demo project for Spring Boot</description>
-	<url/>
+	<name>Restaurant</name>
+	<description>Restaurant project for Innowise Java Lab</description>
+    <packaging>pom</packaging>
+    <url/>
+
 	<licenses>
 		<license/>
 	</licenses>
@@ -28,9 +31,22 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
-	</properties>
+    </properties>
+
+    <modules>
+        <module>
+            orderservice
+        </module>
+        <module>
+            restaurantservice
+        </module>
+        <module>
+            userservice
+        </module>
+    </modules>
+
 	<dependencies>
-		<dependency>
+        <!--<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
@@ -38,6 +54,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -48,7 +70,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency>
+		</dependency>-->
 	</dependencies>
 
 	<build>

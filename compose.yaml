@@ -1,23 +1,43 @@
-# IP addresses:
-# Data Bases:
-#   172.32.2.[3-254]:5432
-# PGAdmin4:
-#   172.32.2.2:80 (localhost:80 from browser)
-
 services:
-  postgres-test:
-    container_name: postgres-test
+  db-user-container:
+    container_name: zhelezniy
     image: postgres
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=password
     ports: 
-      - 5432:5432
+      - 5433:5433
     volumes: 
-      - db-test:/var/lib/postgresql/data
+      - db-user:/var/lib/postgresql/data
     networks:
       restaurant:
-        ipv4_address: 172.32.2.3
+        ipv4_address: 148.32.2.3
+  db-orders-container:
+    container_name: bankomat
+    image: postgres
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5434:5434
+    volumes:
+      - db-orders:/var/lib/postgresql/data
+    networks:
+      restaurant:
+        ipv4_address: 148.32.2.4
+  db-restaurant-container:
+    container_name: maxim
+    image: postgres
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5435:5435
+    volumes:
+      - db-restaurant:/var/lib/postgresql/data
+    networks:
+      restaurant:
+        ipv4_address: 148.32.2.5
 
   pgadmin4:
     container_name: pgadmin4
@@ -31,11 +51,13 @@ services:
       - pgadmin4-volume:/var/lib/pgadmin
     networks:
       restaurant:
-        ipv4_address: 172.32.2.2
+        ipv4_address: 148.32.2.2
 
 volumes:
   app:
-  db-test:
+  db-user:
+  db-restaurant:
+  db-orders:
   pgadmin4-volume:
 
 networks:
@@ -43,4 +65,4 @@ networks:
     ipam:
       driver: default
       config:
-       - subnet: "172.32.2.0/24"
+       - subnet: "148.32.2.0/24"
