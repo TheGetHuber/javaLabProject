@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: orderDB-create-order-item
+      author: Daniil
+      changes:
+        - createTable:
+            tableName: order_item
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: orderId
+                  type: bigint
+                  constraints:
+                    foreignKeyName: orderId
+                    nullable: false
+              - column:
+                  name: dishId
+                  type: bigint
+                  constraints:
+                    foreignKeyName: dishId
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: int
+                  constraints:
+                    nullable: false

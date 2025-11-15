@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: orderDB-create-order
+      author: Daniil
+      changes:
+        - createTable:
+            tableName: order
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: orderDate
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: userId
+                  type: integer
+                  constraints:
+                    foreignKeyName: userId
+                    nullable: false
+              - column:
+                  name: restaurantId
+                  type: integer
+                  constraints:
+                    foreignKeyName: restaurantId
+                    nullable: false
+              - column:
+                  name: totalPrice
+                  type: integer
+                  constraints:
+                    nullable: false

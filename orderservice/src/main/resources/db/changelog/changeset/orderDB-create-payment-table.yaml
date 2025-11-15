@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: orderDB-create-payment
+      author: Daniil
+      changes:
+        - createTable:
+            tableName: payment
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: orderId
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: orderId
+              - column:
+                  name: method
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar
+                  constraints:
+                    nullable: false
