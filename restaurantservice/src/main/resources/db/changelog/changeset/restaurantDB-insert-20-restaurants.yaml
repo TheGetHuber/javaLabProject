@@ -1,0 +1,144 @@
+  databaseChangeLog:
+  - changeSet:
+      id: insert-20-restaurants
+      author: Daniil
+      changes:
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "La Petite Table" }
+              - column: { name: cuisine, value: "French" }
+              - column: { name: address, value: "12 Rue de Rivoli, Paris" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Trattoria da Marco" }
+              - column: { name: cuisine, value: "Italian" }
+              - column: { name: address, value: "Via Roma 45, Rome" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Sakura Sushi" }
+              - column: { name: cuisine, value: "Japanese" }
+              - column: { name: address, value: "1-2-3 Shibuya, Tokyo" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "El Asador" }
+              - column: { name: cuisine, value: "Argentinian" }
+              - column: { name: address, value: "Av. Corrientes 1000, Buenos Aires" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Spice Route" }
+              - column: { name: cuisine, value: "Indian" }
+              - column: { name: address, value: "56 MG Road, Bangalore" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Blue Ocean Grill" }
+              - column: { name: cuisine, value: "Seafood" }
+              - column: { name: address, value: "200 Harbor St, San Francisco" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Casa de Tapas" }
+              - column: { name: cuisine, value: "Spanish" }
+              - column: { name: address, value: "Calle Mayor 10, Madrid" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Green Garden" }
+              - column: { name: cuisine, value: "Vegetarian" }
+              - column: { name: address, value: "89 Elm St, Portland" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "The Grill House" }
+              - column: { name: cuisine, value: "Steakhouse" }
+              - column: { name: address, value: "15 King St, London" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Bistro Nord" }
+              - column: { name: cuisine, value: "Scandinavian" }
+              - column: { name: address, value: "5 Fjordveien, Oslo" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Mama's Kitchen" }
+              - column: { name: cuisine, value: "Home-style" }
+              - column: { name: address, value: "22 Maple Ave, Toronto" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Café Milano" }
+              - column: { name: cuisine, value: "Italian" }
+              - column: { name: address, value: "Via Veneto 7, Milan" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Pho Saigon" }
+              - column: { name: cuisine, value: "Vietnamese" }
+              - column: { name: address, value: "48 Le Loi, Ho Chi Minh City" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Tandoori Palace" }
+              - column: { name: cuisine, value: "Indian" }
+              - column: { name: address, value: "128 Park Lane, Mumbai" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Pancake Corner" }
+              - column: { name: cuisine, value: "Breakfast" }
+              - column: { name: address, value: "3 Breakfast Blvd, Melbourne" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Nomad Falafel" }
+              - column: { name: cuisine, value: "Middle Eastern" }
+              - column: { name: address, value: "9 Sultan St, Dubai" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Bánh Mì Express" }
+              - column: { name: cuisine, value: "Vietnamese" }
+              - column: { name: address, value: "77 Nguyen Trai, Hanoi" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Harbor Café" }
+              - column: { name: cuisine, value: "Café" }
+              - column: { name: address, value: "10 Pier Ave, Seattle" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "El Rinconcito" }
+              - column: { name: cuisine, value: "Latin" }
+              - column: { name: address, value: "Av. Sol 45, Lima" }
+
+        - insert:
+            tableName: restaurant
+            columns:
+              - column: { name: name, value: "Okonomiyaki House" }
+              - column: { name: cuisine, value: "Japanese" }
+              - column: { name: address, value: "2 Dotonbori, Osaka" }

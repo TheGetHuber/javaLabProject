@@ -19,24 +19,22 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: orderDate
+                  name: order_date
                   type: datetime
                   constraints:
                     nullable: false
               - column:
-                  name: userId
+                  name: user_id
                   type: integer
                   constraints:
-                    foreignKeyName: userId
                     nullable: false
               - column:
-                  name: restaurantId
+                  name: restaurant_id
                   type: integer
                   constraints:
-                    foreignKeyName: restaurantId
                     nullable: false
               - column:
-                  name: totalPrice
+                  name: total_price
                   type: integer
                   constraints:
                     nullable: false

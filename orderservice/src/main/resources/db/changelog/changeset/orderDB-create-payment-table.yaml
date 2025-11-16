@@ -14,11 +14,10 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: orderId
+                  name: order_id
                   type: bigint
                   constraints:
                     nullable: false
-                    foreignKeyName: orderId
               - column:
                   name: method
                   type: varchar

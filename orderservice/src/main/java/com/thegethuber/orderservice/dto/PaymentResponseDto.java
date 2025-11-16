@@ -5,16 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Date;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderRequestDto {
+public class PaymentResponseDto {
+    private Long id;
+    private Long orderId;
+    private String method;
+    private Integer amount;
     private String status;
-    private Date orderDate;
-    private Integer userId;
-    private Integer restaurantId;
-    private Integer totalPrice;
 }

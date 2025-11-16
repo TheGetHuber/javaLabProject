@@ -1,4 +1,7 @@
 package com.thegethuber.orderservice.repositories;
 
-public class PaymentRepository {
+import com.thegethuber.orderservice.entities.Payment;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PaymentRepository extends JpaRepository<Payment, Long> {
 }

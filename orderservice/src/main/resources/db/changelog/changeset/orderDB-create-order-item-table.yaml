@@ -14,16 +14,14 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: orderId
+                  name: order_id
                   type: bigint
                   constraints:
-                    foreignKeyName: orderId
                     nullable: false
               - column:
-                  name: dishId
+                  name: dish_id
                   type: bigint
                   constraints:
-                    foreignKeyName: dishId
                     nullable: false
               - column:
                   name: quantity

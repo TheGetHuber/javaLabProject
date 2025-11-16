@@ -4,8 +4,8 @@ databaseChangeLog:
       author: Daniil
       changes:
         - addForeignKeyConstraint:
-            constraintName: fk_orderToOrderItem_orderId
-            baseTableName: order_item
+            constraintName: fk_orderToPayment_orderId
+            baseTableName: payment
             baseColumnNames: order_id
             referencedTableName: order
             referencedColumnNames: id

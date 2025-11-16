@@ -1,19 +1,19 @@
 services:
   db-user-container:
-    container_name: zhelezniy
+    container_name: db-user
     image: postgres
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=password
-    ports: 
+    ports:
       - 5433:5433
-    volumes: 
+    volumes:
       - db-user:/var/lib/postgresql/data
     networks:
       restaurant:
         ipv4_address: 148.32.2.3
   db-orders-container:
-    container_name: bankomat
+    container_name: db-orders
     image: postgres
     environment:
       - POSTGRES_USER=root
@@ -26,7 +26,7 @@ services:
       restaurant:
         ipv4_address: 148.32.2.4
   db-restaurant-container:
-    container_name: maxim
+    container_name: db-restaurant
     image: postgres
     environment:
       - POSTGRES_USER=root
@@ -65,4 +65,4 @@ networks:
     ipam:
       driver: default
       config:
-       - subnet: "148.32.2.0/24"
+        - subnet: "148.32.2.0/24"

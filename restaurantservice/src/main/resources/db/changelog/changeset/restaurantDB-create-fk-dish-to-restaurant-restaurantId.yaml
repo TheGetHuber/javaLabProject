@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-fk-dish-to-restaurant-restaurantId
+      author: Daniil
+      changes:
+        - addForeignKeyConstraint:
+            constraintName: fk-dish-to-restaurant-restaurantId
+            baseTableName: dish
+            baseColumnNames: restaurant_id
+            referencedTableName: restaurant
+            referencedColumnNames: id
