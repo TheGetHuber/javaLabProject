@@ -1,0 +1,374 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.7'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.thegethuber'
+version = '0.0.1-SNAPSHOT'
+description = 'Innowise Java Lab'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.liquibase:liquibase-core'
+	implementation 'org.springframework.kafka:spring-kafka'
+	compileOnly 'org.projectlombok:lombok'
+	implementation 'org.mapstruct:mapstruct:1.6.3'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// docker compose tasks territory
+
+def dGroup = "Docker Compose"
+def dConf = file("compose.yaml")
+
+def tcpOpen = { host, int port ->
+	try {
+		new Socket().withCloseable { s ->
+			s.soTimeout = 1000
+			s.connect(new InetSocketAddress(host, port), 1000)
+			return true
+		}
+	} catch (Exception e) {
+		return false
+	}
+}
+
+def waitForPostgres = { ports, timeoutSeconds = 60 ->
+	def hosts = ['148.32.2.3', '148.32.2.4', '148.32.2.5']
+	def intervalMillis = 1000
+	def start = System.currentTimeMillis()
+	while (System.currentTimeMillis() - start < timeoutSeconds * 1000) {
+		if (ports.every { p -> hosts.any { h -> tcpOpen(h, p) } }) return true
+		Thread.sleep(intervalMillis)
+	}
+	return false
+}
+
+// regs
+tasks.register('composeStart') {
+	group = dGroup
+	description = 'Start docker-compose and wait until Postgres services are ready.'
+
+	doFirst {
+		logger.lifecycle("composeStart: PATH=${System.getenv('PATH')}")
+		if (!dConf.exists()) {
+			throw new GradleException("composeStart: ${dConf} not found")
+		}
+		logger.lifecycle('composeStart: running docker compose up -d...')
+	}
+
+	doLast {
+		// запуск внешней команды через project.exec
+		project.exec {
+			executable = 'docker'
+			args = ['compose', '-f', dConf.toString(), 'up', '-d', '--remove-orphans']
+			ignoreExitValue = false
+			standardOutput = new ByteArrayOutputStream()
+			errorOutput = standardOutput
+		}
+
+		def hosts = ['localhost', 'localhost', 'localhost']
+		def ports = [5433, 5434, 5435]
+		def timeoutSeconds = 60
+		def intervalMillis = 1000
+		def start = System.currentTimeMillis()
+		boolean allUp = false
+
+		logger.lifecycle("composeStart: waiting for Postgres on ports ${ports} (timeout ${timeoutSeconds}s)...")
+		while (System.currentTimeMillis() - start < timeoutSeconds * 1000) {
+			def ok = ports.every { p -> hosts.any { h -> tcpOpen(h, p) } }
+			if (ok) { allUp = true; break }
+			Thread.sleep(intervalMillis)
+		}
+
+		if (!allUp) {
+			logger.error("composeStart: timeout waiting for Postgres. Showing recent logs...")
+			try {
+				project.exec {
+					executable = 'docker'
+					args = ['compose', 'logs', '--no-color', '--tail', '200']
+					ignoreExitValue = true
+					standardOutput = new ByteArrayOutputStream()
+					errorOutput = standardOutput
+				}
+			} catch (Exception e) {
+				logger.lifecycle("composeStart: couldn't fetch logs: ${e.message}")
+			}
+			throw new GradleException("composeStart: services not ready within ${timeoutSeconds}s")
+		}
+
+		logger.lifecycle("composeStart: services are up.")
+	}
+}
+tasks.register('composeKill') {
+	group = dGroup
+	description = 'Forcefully kill and remove containers/volumes from docker-compose.'
+
+	doFirst {
+		logger.lifecycle("composeKill: PATH=${System.getenv('PATH')}")
+		if (!dConf.exists()) logger.lifecycle("composeKill: ${dConf} not found; attempting kill without -f")
+		logger.lifecycle('composeKill: running docker compose down --volumes --remove-orphans (and force rm if needed)...')
+	}
+
+	doLast {
+		def out = new ByteArrayOutputStream()
+		def res = project.exec {
+			executable = 'docker'
+			args = ['compose', '-f', dConf.toString(), 'down', '--volumes', '--remove-orphans']
+			ignoreExitValue = true
+			standardOutput = out
+			errorOutput = out
+		}
+		logger.lifecycle(out.toString())
+
+		if (res.exitValue != 0) {
+			// Попытка жёстко удалить запущенные контейнеры по именам из compose (container_name)
+			logger.lifecycle('composeKill: down failed, attempting force remove of known containers...')
+			def containers = ['db-user','db-orders','db-restaurant','pgadmin4']
+			containers.each { name ->
+				try {
+					def out2 = new ByteArrayOutputStream()
+					project.exec {
+						executable = 'docker'
+						args = ['rm', '-f', name]
+						ignoreExitValue = true
+						standardOutput = out2
+						errorOutput = out2
+					}
+					logger.lifecycle("rm -f ${name}: ${out2.toString()}")
+				} catch (Exception e) {
+					logger.lifecycle("Failed to rm -f ${name}: ${e.message}")
+				}
+			}
+
+			try {
+				def out3 = new ByteArrayOutputStream()
+				project.exec {
+					executable = 'docker'
+					args = ['volume', 'ls', '--format', '{{.Name}}']
+					ignoreExitValue = true
+					standardOutput = out3
+					errorOutput = out3
+				}
+				logger.lifecycle(out3.toString())
+			} catch (Exception ignored) {}
+
+			throw new GradleException("composeKill: initial down failed; performed force remove attempts.")
+		} else {
+			logger.lifecycle('composeKill: compose down succeeded, containers and volumes removed.')
+		}
+	}
+}
+tasks.register('composeStop') {
+	group = dGroup
+	description = 'Gracefully stop containers from docker-compose (docker compose stop).'
+
+	doFirst {
+		logger.lifecycle("composeStop: PATH=${System.getenv('PATH')}")
+		if (!dConf.exists()) logger.lifecycle("composeStop: ${dConf} not found; attempting stop without -f")
+		logger.lifecycle('composeStop: running docker compose stop...')
+	}
+
+	doLast {
+		def out = new ByteArrayOutputStream()
+		def res = project.exec {
+			executable = 'docker'
+			args = ['compose', '-f', dConf.toString(), 'stop']
+			ignoreExitValue = true
+			standardOutput = out
+			errorOutput = out
+		}
+		logger.lifecycle(out.toString())
+		if (res.exitValue != 0) {
+			throw new GradleException("composeStop failed (exitCode=${res.exitValue})")
+		} else {
+			logger.lifecycle('composeStop: containers stopped.')
+		}
+	}
+}
+tasks.register('composeRestart') {
+	group = dGroup
+	description = 'Gracefully stop containers, then start them again and wait for Postgres readiness.'
+
+	doFirst {
+		logger.lifecycle("composeRestart: PATH=${System.getenv('PATH')}")
+		if (!dConf.exists()) throw new GradleException("composeRestart: ${dConf} not found")
+	}
+
+	doLast {
+		// stop
+		logger.lifecycle('composeRestart: stopping containers (docker compose stop)...')
+		def stopOut = new ByteArrayOutputStream()
+		def stopRes = project.exec {
+			executable = 'docker'
+			args = ['compose', '-f', dConf.toString(), 'stop']
+			ignoreExitValue = true
+			standardOutput = stopOut
+			errorOutput = stopOut
+		}
+		logger.lifecycle(stopOut.toString())
+		if (stopRes.exitValue != 0) {
+			logger.lifecycle("composeRestart: warning — stop returned ${stopRes.exitValue}, continuing with start.")
+		}
+
+		// up
+		logger.lifecycle('composeRestart: starting containers (docker compose up -d)...')
+		def upOut = new ByteArrayOutputStream()
+		def upRes = project.exec {
+			executable = 'docker'
+			args = ['compose', '-f', dConf.toString(), 'up', '-d', '--remove-orphans']
+			ignoreExitValue = true
+			standardOutput = upOut
+			errorOutput = upOut
+		}
+		logger.lifecycle(upOut.toString())
+		if (upRes.exitValue != 0) {
+			throw new GradleException("composeRestart: docker compose up failed (exitCode=${upRes.exitValue})")
+		}
+
+		// wait for Postgres
+		def ports = [5433, 5434, 5435]
+		logger.lifecycle("composeRestart: waiting for Postgres on ports ${ports}...")
+		if (!waitForPostgres(ports, 60)) {
+			logger.error('composeRestart: Postgres readiness timeout; showing recent logs...')
+			try {
+				def logsOut = new ByteArrayOutputStream()
+				project.exec {
+					executable = 'docker'
+					args = ['compose', 'logs', '--no-color', '--tail', '200']
+					ignoreExitValue = true
+					standardOutput = logsOut
+					errorOutput = logsOut
+				}
+				logger.lifecycle(logsOut.toString())
+			} catch (Exception e) {
+				logger.lifecycle("composeRestart: couldn't fetch logs: ${e.message}")
+			}
+			throw new GradleException('composeRestart: services not ready within timeout')
+		}
+
+		logger.lifecycle('composeRestart: done, services are up.')
+	}
+}
+tasks.register('composeRestartHard') {
+	group = dGroup
+	description = 'Forcefully kill/remove containers then start them again and wait for Postgres readiness.'
+
+	doFirst {
+		logger.lifecycle("composeRestartHard: PATH=${System.getenv('PATH')}")
+		if (!composeFile.exists()) throw new GradleException("composeRestartHard: ${composeFile} not found")
+	}
+
+	doLast {
+		// first try compose down
+		logger.lifecycle('composeRestartHard: attempting docker compose down --volumes --remove-orphans...')
+		def downOut = new ByteArrayOutputStream()
+		def downRes = project.exec {
+			executable = 'docker'
+			args = ['compose', '-f', composeFile.toString(), 'down', '--volumes', '--remove-orphans']
+			ignoreExitValue = true
+			standardOutput = downOut
+			errorOutput = downOut
+		}
+		logger.lifecycle(downOut.toString())
+
+		if (downRes.exitValue != 0) {
+			logger.lifecycle("composeRestartHard: compose down failed (exit ${downRes.exitValue}), attempting force rm by container name...")
+			def containerNames = ['db-user','db-orders','db-restaurant','pgadmin4']
+			containerNames.each { name ->
+				try {
+					def rmOut = new ByteArrayOutputStream()
+					project.exec {
+						executable = 'docker'
+						args = ['rm', '-f', name]
+						ignoreExitValue = true
+						standardOutput = rmOut
+						errorOutput = rmOut
+					}
+					logger.lifecycle("rm -f ${name}: ${rmOut.toString()}")
+				} catch (Exception e) {
+					logger.lifecycle("composeRestartHard: failed rm -f ${name}: ${e.message}")
+				}
+			}
+			// try removing volumes referenced in compose (best-effort)
+			try {
+				def volOut = new ByteArrayOutputStream()
+				project.exec {
+					executable = 'docker'
+					args = ['volume', 'rm', '-f', 'db-user', 'db-orders', 'db-restaurant', 'pgadmin4-volume']
+					ignoreExitValue = true
+					standardOutput = volOut
+					errorOutput = volOut
+				}
+				logger.lifecycle("volume rm: ${volOut.toString()}")
+			} catch (Exception ignored) {}
+		}
+
+		// start
+		logger.lifecycle('composeRestartHard: starting containers (docker compose up -d)...')
+		def upOut = new ByteArrayOutputStream()
+		def upRes = project.exec {
+			executable = 'docker'
+			args = ['compose', '-f', composeFile.toString(), 'up', '-d', '--remove-orphans']
+			ignoreExitValue = true
+			standardOutput = upOut
+			errorOutput = upOut
+		}
+		logger.lifecycle(upOut.toString())
+		if (upRes.exitValue != 0) {
+			throw new GradleException("composeRestartHard: docker compose up failed (exitCode=${upRes.exitValue})")
+		}
+
+		// wait for Postgres
+		def ports = [5433, 5434, 5435]
+		logger.lifecycle("composeRestartHard: waiting for Postgres on ports ${ports}...")
+		if (!waitForPostgres(ports, 60)) {
+			logger.error('composeRestartHard: Postgres readiness timeout; showing recent logs...')
+			try {
+				def logsOut = new ByteArrayOutputStream()
+				project.exec {
+					executable = 'docker'
+					args = ['compose', 'logs', '--no-color', '--tail', '200']
+					ignoreExitValue = true
+					standardOutput = logsOut
+					errorOutput = logsOut
+				}
+				logger.lifecycle(logsOut.toString())
+			} catch (Exception e) {
+				logger.lifecycle("composeRestartHard: couldn't fetch logs: ${e.message}")
+			}
+			throw new GradleException('composeRestartHard: services not ready within timeout')
+		}
+
+		logger.lifecycle('composeRestartHard: done, services are up.')
+	}
+}
