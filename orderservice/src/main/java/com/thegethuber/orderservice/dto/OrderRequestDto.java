@@ -12,7 +12,6 @@ import java.sql.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderRequestDto {
-    private String status;
     private Date orderDate;
     private Integer userId;
     private Integer restaurantId;

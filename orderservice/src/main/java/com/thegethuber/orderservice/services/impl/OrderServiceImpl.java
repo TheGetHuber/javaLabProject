@@ -1,9 +1,11 @@
 package com.thegethuber.orderservice.services.impl;
 
 import com.thegethuber.orderservice.dto.OrderItemRequestDto;
+import com.thegethuber.orderservice.dto.OrderItemResponseDto;
 import com.thegethuber.orderservice.dto.OrderRequestDto;
 import com.thegethuber.orderservice.dto.OrderResponseDto;
 import com.thegethuber.orderservice.entities.Order;
+import com.thegethuber.orderservice.entities.OrderItem;
 import com.thegethuber.orderservice.exceptions.OrderNotFoundException;
 import com.thegethuber.orderservice.mappers.OrderItemMapper;
 import com.thegethuber.orderservice.mappers.OrderMapper;
@@ -27,26 +29,23 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDto placeOrder(OrderRequestDto orderRequestDto, List<OrderItemRequestDto> items){
         Order order = orderMapper.toOrder(orderRequestDto);
+        order.setStatus("Not payed");
+        OrderResponseDto orderResponseDto = orderMapper.toResponseDto(orderRepository.save(order));
 
-        for(OrderItemRequestDto item : items){
+        for(OrderItemRequestDto orderItemRequestDto : items){
+            OrderItem item = orderItemMapper.toOrderItem(orderItemRequestDto);
             item.setOrderId(order.getId());
-            orderItemRepository.save(orderItemMapper.toOrderItem(item));
+            orderItemRepository.save(item);
         }
 
-//        items.stream().map(
-//                item -> orderItemMapper.toOrderItem(item)
-//                )
-//                .forEach(orderItemRepository::save);
-//
-        return orderMapper.toResponseDto(orderRepository.save(order));
+        return orderResponseDto;
     }
 
     @Override
     public OrderResponseDto updateOrder(Long id, String status){
-        if(!orderRepository.existsById(id)){
-            throw new OrderNotFoundException("Order with given ID " + id + " was not found!");
-        }
-        Order order = orderRepository.findById(id).get();
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new OrderNotFoundException("Order with given ID " + id + " was not found!")
+        );
 
         order.setStatus(status);
 
@@ -60,11 +59,20 @@ public class OrderServiceImpl implements OrderService {
         );
     }
     @Override
-    public List<OrderResponseDto> getOrderByUserId(Integer id){
+    public List<OrderResponseDto> getOrderByUserId(Long id){
         return orderRepository.findAllByUserId(id);
     }
     @Override
-    public List<OrderResponseDto> getOrdersByRestaurantId(Integer restaurantId){
+    public List<OrderResponseDto> getOrdersByRestaurantId(Long restaurantId){
         return orderRepository.findAllByRestaurantId(restaurantId);
+    }
+
+    @Override
+    public List<OrderItemResponseDto> getOrderItemsByOrderId(Long orderId){
+        return orderItemRepository
+                .findAllByOrderId(orderId)
+                .stream()
+                .map(orderItemMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

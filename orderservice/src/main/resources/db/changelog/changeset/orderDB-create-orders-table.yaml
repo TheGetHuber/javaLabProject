@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: orderDB-create-order
+      id: orderDB-create-orders
       author: Daniil
       changes:
         - createTable:
-            tableName: order
+            tableName: orders
             columns:
               - column:
                   name: id
