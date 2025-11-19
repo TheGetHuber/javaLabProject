@@ -96,8 +96,8 @@ tasks.register('composeStart') {
 			errorOutput = standardOutput
 		}
 
-		def hosts = ['localhost', 'localhost', 'localhost']
-		def ports = [5433, 5434, 5435]
+		def hosts = ['148.32.2.3', '148.32.2.4', '148.32.2.5']
+		def ports = [5432, 5432, 5432]
 		def timeoutSeconds = 60
 		def intervalMillis = 1000
 		def start = System.currentTimeMillis()
