@@ -18,4 +18,6 @@ public interface RestaurantService {
     DishResponseDto updateDish(Long dishId, DishRequestDto dishRequestDto);
     void deleteDish(Long dishId);
     DishResponseDto getDish(Long dishId);
+    List<DishResponseDto> listDishesByRestaurant(Long restaurantId);
+    List<DishResponseDto> listDishes();
 }

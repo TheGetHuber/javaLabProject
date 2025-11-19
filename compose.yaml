@@ -5,8 +5,6 @@ services:
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=password
-    ports:
-      - 5433:5433
     volumes:
       - db-user:/var/lib/postgresql/data
     networks:
@@ -18,8 +16,6 @@ services:
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=password
-    ports:
-      - 5434:5434
     volumes:
       - db-orders:/var/lib/postgresql/data
     networks:
@@ -31,34 +27,16 @@ services:
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=password
-    ports:
-      - 5435:5435
     volumes:
       - db-restaurant:/var/lib/postgresql/data
     networks:
       restaurant:
         ipv4_address: 148.32.2.5
 
-  pgadmin4:
-    container_name: pgadmin4
-    image: dpage/pgadmin4
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=root@root.com
-      - PGADMIN_DEFAULT_PASSWORD=passwd
-    ports:
-      - 80:80
-    volumes:
-      - pgadmin4-volume:/var/lib/pgadmin
-    networks:
-      restaurant:
-        ipv4_address: 148.32.2.2
-
 volumes:
-  app:
   db-user:
   db-restaurant:
   db-orders:
-  pgadmin4-volume:
 
 networks:
   restaurant:

@@ -121,9 +121,24 @@ public class RestaurantServiceImpl implements RestaurantService {
 
         dishRepository.removeDishById(dishId);
     }
+    @Override
     public DishResponseDto getDish(Long dishId){
         Dish dish = dishRepository.findById(dishId)
                 .orElseThrow(() -> new DishDoesNotExistsException("Dish with this ID (" + dishId + ") does not exists!"));
         return dishMapper.toResponseDto(dish);
+    }
+    @Override
+    public List<DishResponseDto> listDishesByRestaurant(Long restaurantId){
+        return dishRepository.findAllByRestaurantId(restaurantId)
+                .stream()
+                .map(dishMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<DishResponseDto> listDishes(){
+        return dishRepository.findAll()
+                .stream()
+                .map(dishMapper::toResponseDto)
+                .collect(Collectors.toList());
     }
 }
