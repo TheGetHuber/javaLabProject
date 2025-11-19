@@ -1,13 +1,13 @@
 databaseChangeLog:
   - changeSet:
-      id: create-fk-order-to-order-item,
+      id: create-fk-orders-to-order-item,
       author: Daniil
       changes:
         - addForeignKeyConstraint:
-            constraintName: fk_orderToOrderItem_orderId
+            constraintName: fk_ordersToOrderItem_orderId
             baseTableName: order_item
             baseColumnNames: order_id
-            referencedTableName: order
+            referencedTableName: orders
             referencedColumnNames: id
             onUpdate: CASCADE
             onDelete: CASCADE

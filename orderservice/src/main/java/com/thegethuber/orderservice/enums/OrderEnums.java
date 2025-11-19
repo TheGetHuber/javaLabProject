@@ -1,6 +1,7 @@
 package com.thegethuber.orderservice.enums;
 
 public enum OrderEnums {
+    STATUS_NOTPAYED,    // Converts to "Not payed"
     STATUS_COOKING,     // Converts to "Cooking"
     STATUS_DELIVERING,  // Converts to "Delivering"
     STATUS_REJECTED,    // Converts to "Rejected"
